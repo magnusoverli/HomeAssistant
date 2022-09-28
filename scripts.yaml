@@ -1,0 +1,59 @@
+wake_appletv:
+  alias: Wake AppleTV and start Netflix
+  sequence:
+  - service: remote.send_command
+    data:
+      entity_id: remote.appletv
+      command: wakeup
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 6
+      milliseconds: 0
+  - service: remote.send_command
+    data:
+      entity_id: remote.appletv
+      delay_secs: 0.7
+      command:
+      - top_menu
+      - top_menu
+      - top_menu
+      - right
+      - right
+      - select
+  mode: single
+  icon: mdi:set-top-box
+movietime:
+  alias: MovieTime
+  sequence:
+  - scene: scene.movie_time
+  - service: script.turn_on
+    target:
+      entity_id: script.wake_appletv
+  mode: single
+  icon: mdi:movie
+end_movie_time:
+  alias: End Movie Time
+  sequence:
+  - service: light.turn_on
+    target:
+      area_id: living_room
+    data:
+      transition: 10
+      brightness_pct: 30
+  - service: homeassistant.turn_off
+    target:
+      entity_id: media_player.q9
+  - service: homeassistant.turn_off
+    target:
+      entity_id: media_player.str_dn1080_ba9c4e
+  - service: remote.send_command
+    data:
+      entity_id: remote.appletv
+      delay_secs: 1
+      command:
+      - home_hold
+      - select
+  mode: single
+  icon: mdi:movie
+########################

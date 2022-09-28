@@ -1,0 +1,6 @@
+- name: Docker
+  url: tcp://192.168.5.47:4243
+  containers:
+    - radarr
+    - sonarr
+    - transmission

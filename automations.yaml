@@ -1,0 +1,777 @@
+- id: '1615210100164'
+  alias: Indoor Lights - All Off
+  description: ''
+  trigger:
+  - platform: event
+    event_type: zwave_js_value_notification
+    event_data:
+      node_id: 9
+      property_key: '002'
+      value_raw: 0
+  condition: []
+  action:
+  - service: light.turn_off
+    data: {}
+    target:
+      entity_id:
+      - light.z2m_hall_group
+      - light.z2m_kitchen
+      - light.z2m_livingroom_group
+  mode: single
+- id: '1615210479631'
+  alias: Indoor Lights - All On
+  description: ''
+  trigger:
+  - platform: event
+    event_type: zwave_js_value_notification
+    event_data:
+      node_id: 9
+      property_key: '002'
+      value_raw: 2
+  condition: []
+  action:
+  - service: light.turn_on
+    data:
+      brightness_pct: 80
+      transition: 4
+    target:
+      entity_id:
+      - light.z2m_hall_group
+      - light.z2m_livingroom_group
+      - light.z2m_kitchen
+  mode: single
+- id: '1615211337163'
+  alias: Good night
+  description: ''
+  trigger:
+  - platform: event
+    event_type: zwave_js_value_notification
+    event_data:
+      node_id: 9
+      property_key: '001'
+      value_raw: 0
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: time
+        before: 04:00:00
+        after: '20:00:00'
+        weekday:
+        - mon
+        - tue
+        - wed
+        - thu
+        - fri
+        - sat
+        - sun
+      sequence:
+      - service: input_boolean.turn_on
+        data: {}
+        target:
+          entity_id: input_boolean.nightmode
+    default: []
+  - service: light.turn_off
+    data: {}
+    target:
+      entity_id:
+      - light.z2m_guestroom
+      - light.z2m_kitchen
+      - light.z2m_livingroom_group
+      - light.z2m_booth_group
+      - light.hall_spot_2
+      - light.hall_spot_3
+      - light.hall_wall_lamp
+      - light.shoeroom_spot_1
+      - light.shoeroom_spot_3
+      - light.entrance_ceiling_lamp
+      - light.entrance_ceiling_spot
+      - light.booth_spot_1
+      - light.booth_spot_2
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 1
+      milliseconds: 0
+  - service: light.turn_on
+    data:
+      brightness_pct: 20
+      transition: 3
+    target:
+      entity_id:
+      - light.shoeroom_spot_2
+      - light.hall_spot_1
+  mode: single
+- id: '1615221846771'
+  alias: Outdoor Lights Toggle
+  description: ''
+  trigger:
+  - platform: event
+    event_type: zwave_js_value_notification
+    event_data:
+      node_id: 9
+      property_key: '004'
+      value_raw: 0
+  condition: []
+  action:
+  - service: light.toggle
+    data:
+      brightness_pct: 90
+    target:
+      entity_id: light.z2m_outdoors
+  mode: single
+- id: '1615228661726'
+  alias: Kitchen Countertop Light Off
+  description: ''
+  trigger:
+  - platform: device
+    type: turned_off
+    device_id: 39578cc3e4c1fdff0f9279eaf8ae6a70
+    entity_id: light.kitchen_spot_1
+    domain: light
+  condition: []
+  action:
+  - type: turn_off
+    device_id: a21bb3c2d948eaebaf81b728e10f3527
+    entity_id: light.kitchen_countertop_light
+    domain: light
+  mode: single
+- id: '1615228681015'
+  alias: Kitchen Countertop Light On
+  description: ''
+  trigger:
+  - platform: device
+    type: turned_on
+    device_id: 39578cc3e4c1fdff0f9279eaf8ae6a70
+    entity_id: light.kitchen_spot_1
+    domain: light
+  condition: []
+  action:
+  - type: turn_on
+    device_id: a21bb3c2d948eaebaf81b728e10f3527
+    entity_id: light.kitchen_countertop_light
+    domain: light
+  mode: single
+- id: '1615228980878'
+  alias: Kitchen downlight control
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: light.kitchen_spot_1
+  condition: []
+  action:
+  - service: light.turn_on
+    data_template:
+      brightness: "{% set new_level = trigger.to_state.attributes.brightness|int %}
+        {% if 0 < new_level < 50 %}\n  50\n{% elif 200 < new_level < 256 %}\n  200\n{%
+        else %}\n  {{ new_level }}\n{% endif %}"
+      entity_id: light.kitchen_spot_dimmer
+  mode: parallel
+  max: 4
+- id: '1615229226675'
+  alias: Kitchen downlight On
+  description: ''
+  trigger:
+  - platform: device
+    type: turned_on
+    device_id: 39578cc3e4c1fdff0f9279eaf8ae6a70
+    entity_id: light.kitchen_spot_1
+    domain: light
+  condition: []
+  action:
+  - type: turn_on
+    device_id: b0e9323db6a70fbad554185a7eabb4cb
+    entity_id: light.kitchen_spot_dimmer
+    domain: light
+  mode: single
+- id: '1615229259977'
+  alias: Kitchen downlight Off
+  description: ''
+  trigger:
+  - platform: device
+    type: turned_off
+    device_id: 8657d2fe0bcc5f591fc2c58c532b587c
+    entity_id: light.kitchen_spot_2
+    domain: light
+  condition: []
+  action:
+  - type: turn_off
+    device_id: b0e9323db6a70fbad554185a7eabb4cb
+    entity_id: switch.kitchen_spot_dimmer
+    domain: switch
+  mode: single
+- id: '1608663057415'
+  alias: Kids Room Wled - Nightlight
+  description: ''
+  trigger:
+  - platform: time
+    at: '20:00:00'
+  condition: []
+  action:
+  - service: light.turn_on
+    data:
+      brightness_pct: 70
+      rgb_color:
+      - 255
+      - 0
+      - 0
+      transition: 5
+    target:
+      entity_id: light.wled
+  mode: single
+- id: '1608663105878'
+  alias: Kids Room Wled - Daylight
+  description: ''
+  trigger:
+  - platform: time
+    at: 06:30:00
+  condition: []
+  action:
+  - service: light.turn_on
+    data:
+      brightness_pct: 80
+      rgb_color:
+      - 0
+      - 255
+      - 0
+      transition: 10
+    target:
+      entity_id: light.wled
+  mode: single
+- id: '1615236082851'
+  alias: Entrance Ceiling Lamp On
+  description: ''
+  trigger:
+  - platform: device
+    type: changed_states
+    device_id: 1c4818df7edfebdb9675d1d6f6f8d03d
+    entity_id: light.shoeroom_spot_1
+    domain: light
+  - platform: state
+    entity_id:
+    - light.shoeroom_spot_1
+    attribute: brightness
+  condition: []
+  action:
+  - data_template:
+      brightness: "{% set new_level = trigger.to_state.attributes.brightness|int %}
+        \ {% if 0 < new_level < 20 %}\n  30\n{% elif 250 < new_level < 256 %}\n  256\n{%
+        else %}\n  {{ new_level }}\n{% endif %}"
+      entity_id:
+      - light.entrance_ceiling_lamp
+    service: light.turn_on
+  mode: single
+- id: '1615236098633'
+  alias: Entrance Ceiling Light Off
+  description: ''
+  trigger:
+  - platform: device
+    type: turned_off
+    device_id: 1c4818df7edfebdb9675d1d6f6f8d03d
+    entity_id: light.shoeroom_spot_1
+    domain: light
+  condition: []
+  action:
+  - type: turn_off
+    device_id: 7b8c92a2069a59341614963f219e8fb4
+    entity_id: light.entrance_ceiling_lamp
+    domain: light
+  - service: light.turn_off
+    data: {}
+    target:
+      entity_id: light.entrance_ceiling_spot
+  mode: single
+- id: '1615930734219'
+  alias: Tumble Dryer - Finished
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.appliance_tumble_dryer_power
+    for: 00:02:10
+    below: '10'
+  condition:
+  - condition: state
+    entity_id: input_select.tumble_dryer_state
+    state: Running
+  action:
+  - service: sonos.snapshot
+    data:
+      entity_id: media_player.kjokken
+  - service: input_select.select_option
+    data:
+      option: Finished
+    target:
+      entity_id: input_select.tumble_dryer_state
+  - service: notify.mobile_app_magnuss_iphone
+    data:
+      title: Tørketrommel
+      message: Tørketrommelen er ferdig!
+  - service: notify.mobile_app_monas_iphone_2
+    data:
+      message: Tørketrommel
+      title: Tørketrommelen er ferdig!
+  - service: media_player.volume_set
+    target:
+      entity_id: media_player.kjokken
+    data:
+      volume_level: 0.4
+  - service: media_player.play_media
+    data:
+      media_content_type: music
+      media_content_id: https://hassio.magnusoverli.duckdns.org/local/announce.mp3
+    target:
+      entity_id: media_player.kjokken
+  - wait_template: ''
+    timeout: 00:00:03
+    continue_on_timeout: true
+  - service: media_player.volume_set
+    target:
+      entity_id: media_player.kjokken
+    data:
+      volume_level: 0.5
+  - service: tts.google_translate_say
+    data:
+      entity_id: media_player.kjokken
+      message: Tørketrommelen er ferdig.
+      language: 'no'
+      cache: true
+  - wait_template: ''
+    timeout: 00:00:01
+    continue_on_timeout: true
+  - service: sonos.restore
+    data:
+      entity_id: media_player.kjokken
+  - wait_template: ''
+    timeout: 00:00:05
+    continue_on_timeout: true
+  - service: input_select.select_option
+    data:
+      option: Idle
+    target:
+      entity_id: input_select.tumble_dryer_state
+  mode: single
+- id: '1615930867952'
+  alias: Tumble Dryer - Started
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.appliance_tumble_dryer_power
+    above: '50'
+    for: 00:00:10
+  condition:
+  - condition: state
+    entity_id: input_select.tumble_dryer_state
+    state: Idle
+  action:
+  - service: input_select.select_option
+    data:
+      option: Started
+    target:
+      entity_id: input_select.tumble_dryer_state
+  mode: single
+- id: '1615930950141'
+  alias: Tumble Dryer - Running
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.appliance_tumble_dryer_power
+    above: '200'
+    for: 00:00:30
+  condition:
+  - condition: state
+    entity_id: input_select.tumble_dryer_state
+    state: Started
+  action:
+  - service: input_select.select_option
+    data:
+      option: Running
+    target:
+      entity_id: input_select.tumble_dryer_state
+  mode: single
+- id: '1617229794693'
+  alias: Livingroom corner light off
+  description: ''
+  trigger:
+  - platform: device
+    type: turned_off
+    device_id: bae9f684f5e584892f54bb3cb63bc110
+    entity_id: light.livingroom_spot_1
+    domain: light
+  condition: []
+  action:
+  - type: turn_off
+    device_id: 81bab4688d2743c0eaec19ed23187b90
+    entity_id: switch.plant_light
+    domain: switch
+  mode: single
+- id: '1617229814235'
+  alias: Livingroom corner light on
+  description: ''
+  trigger:
+  - platform: device
+    type: turned_on
+    device_id: bae9f684f5e584892f54bb3cb63bc110
+    entity_id: light.livingroom_spot_1
+    domain: light
+  condition: []
+  action:
+  - type: turn_on
+    device_id: 81bab4688d2743c0eaec19ed23187b90
+    entity_id: switch.plant_light
+    domain: switch
+  mode: single
+- id: '1618560358671'
+  alias: Low battery level detection & notification for all battery sensors
+  description: ''
+  use_blueprint:
+    path: sbyx/low-battery-level-detection-notification-for-all-battery-sensors.yaml
+    input:
+      time: '13:00:00'
+      actions:
+      - service: notify.mobile_app_magnuss_iphone
+        data:
+          title: Low battery
+          message: Low battery on '{{sensors}}'
+- id: '1620074306752'
+  alias: Notify if garage door is open at night
+  description: ''
+  trigger:
+  - platform: time
+    at: '22:00:00'
+  condition:
+  - condition: state
+    entity_id: cover.garage_door
+    state: open
+  action:
+  - service: notify.mobile_app_magnuss_iphone
+    data:
+      title: Garasjeporten er åpen!
+      message: Hold på meg for å lukke!
+      data:
+        actions:
+        - action: close
+          title: Lukk porten!
+          destructive: false
+        - action: Ignorer
+          title: Ignorer
+  - service: notify.mobile_app_monas_iphone_5081
+    data:
+      title: Garasjeporten er åpen!
+      message: Hold på meg for å lukke!
+      data:
+        actions:
+        - action: close
+          title: Lukk porten!
+          destructive: false
+        - action: Ignorer
+          title: Ignorer
+  - wait_template: ''
+    timeout: 00:00:55
+    continue_on_timeout: true
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: cover.garage_door
+        state: open
+      - condition: state
+        entity_id: binary_sensor.app_notification_triggered_last_minute
+        state: 'on'
+      sequence:
+      - service: notify.mobile_app_magnuss_iphone
+        data:
+          message: Garageporten er fortsatt åpen. Ligger det noe i veien?
+      - service: notify.mobile_app_monas_iphone_5081
+        data:
+          message: Garageporten er fortsatt åpen. Ligger det noe i veien?
+    default: []
+  mode: single
+- id: '1622445541027'
+  alias: Close Garage Door From Wall Controller
+  description: ''
+  trigger:
+  - platform: event
+    event_type: zwave_js_value_notification
+    event_data:
+      node_id: 9
+      property_key: '003'
+      value_raw: 0
+  - platform: state
+    entity_id: binary_sensor.entrance_ttgo_button_2
+    to: 'on'
+  - platform: event
+    event_type: mobile_app_notification_action
+    event_data:
+      action: close
+  condition: []
+  action:
+  - service: switch.toggle
+    target:
+      device_id: 0485d786d7c4d8a43ae1faf66883854a
+    data: {}
+  mode: single
+- id: '1622445500027'
+  alias: Retain Pulse data - Energy Hourly
+  trigger:
+  - platform: state
+    entity_id: sensor.pulse_energy_hour
+  action:
+  - service: mqtt.publish
+    data_template:
+      retain: true
+      topic: energy/hourly
+      payload_template: '{{ (states(''sensor.pulse_energy_hour'')) }}'
+- id: '1017445500027'
+  alias: Retain Pulse data - Energy Historic
+  trigger:
+  - platform: state
+    entity_id: sensor.pulse_energy_historic
+  action:
+  - service: mqtt.publish
+    data_template:
+      retain: true
+      topic: energy/historic
+      payload_template: '{{ (states(''sensor.pulse_energy_historic'')) }}'
+- id: '2067445500027'
+  alias: Guest Room Sleep Mode
+  trigger:
+  - platform: state
+    entity_id: sensor.guest_room_remote_action
+    attribute: action
+    to: arrow_right_hold
+  action:
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 1
+      milliseconds: 0
+  - service: light.turn_off
+    target:
+      entity_id:
+      - light.guest_room_spot_1
+      - light.guest_room_spot_2
+      - light.guest_room_spot_3
+    data:
+      transition: 2
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 1
+      milliseconds: 0
+  - service: light.turn_on
+    data:
+      color_temp: 400
+      brightness: 1
+      transition: 3
+    target:
+      entity_id: light.guest_room_desktop_lamp
+- id: '1641287495596'
+  alias: Bathroom Lights - On
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.bathroom_multisensor_home_security_motion_detection
+    to: 'on'
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: input_boolean.nightmode
+        state: 'on'
+      sequence:
+      - type: turn_on
+        device_id: 76a02f7a5271966605b0f51d26e4ac75
+        entity_id: light.z2m_bathroom
+        domain: light
+        brightness_pct: 1
+    - conditions:
+      - condition: state
+        entity_id: input_boolean.nightmode
+        state: 'off'
+      sequence:
+      - type: turn_on
+        device_id: 76a02f7a5271966605b0f51d26e4ac75
+        entity_id: light.z2m_bathroom
+        domain: light
+    default: []
+  mode: single
+- id: '1641287534432'
+  alias: Bathroom Lights - Off
+  description: ''
+  trigger:
+  - type: no_motion
+    platform: device
+    device_id: 9503cbfc48eea95a9339b27712b50a76
+    entity_id: binary_sensor.bathroom_multisensor_home_security_motion_detection
+    domain: binary_sensor
+    for:
+      hours: 0
+      minutes: 10
+      seconds: 0
+  condition: []
+  action:
+  - type: turn_off
+    device_id: 76a02f7a5271966605b0f51d26e4ac75
+    entity_id: light.z2m_bathroom
+    domain: light
+  mode: single
+- id: '1643552508888'
+  alias: Washing Machine Finished
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.bosch_wau28pihsn_68a40e588f56_bsh_common_option_programprogress
+    to: '100'
+  condition: []
+  action:
+  - service: notify.mobile_app_monas_iphone_5081
+    data:
+      message: Vaskemaskinen er ferdig
+  - service: notify.mobile_app_iphone
+    data:
+      message: Vaskemaskinen er ferdig
+  - service: notify.mobile_app_mac_mbsetu
+    data:
+      message: Vaskemaskinen er ferdig
+  mode: single
+- id: '1647475682188'
+  alias: Nightmode Off
+  description: ''
+  trigger:
+  - platform: time
+    at: 06:00:00
+  condition: []
+  action:
+  - service: input_boolean.turn_off
+    data: {}
+    target:
+      entity_id: input_boolean.nightmode
+  mode: single
+- id: '1647983279886'
+  alias: Car charger - Start when price is low
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: sensor.nordpool_low_price
+    to: 'True'
+  condition: []
+  action:
+  - type: turn_on
+    device_id: a5c5e6c07a0b178078e85e24fac8d60b
+    entity_id: switch.gte_charging
+    domain: switch
+  mode: single
+- id: '1657053853458'
+  alias: Hourly Consumption Control - Save Power
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.hourly_consumption_control_alarm
+    to: 'True'
+  condition: []
+  action:
+  - type: turn_off
+    device_id: 29b04105d4770c26ebf3d6c1976d6feb
+    entity_id: switch.appliance_water_heater_switch
+    domain: switch
+  - device_id: c4af3cc68b95f995f82af1d7da59bf7a
+    domain: climate
+    entity_id: climate.livingroom_hvac
+    type: set_hvac_mode
+    hvac_mode: 'off'
+  - type: turn_off
+    device_id: b98f46029e65880f81a828851d58c75c
+    entity_id: switch.garage_car_charger_switch
+    domain: switch
+  mode: single
+- id: '1657053904544'
+  alias: Hourly Consumption Control - Reset
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.hourly_consumption_control_alarm
+    to: 'False'
+  condition: []
+  action:
+  - type: turn_on
+    device_id: 29b04105d4770c26ebf3d6c1976d6feb
+    entity_id: switch.appliance_water_heater_switch
+    domain: switch
+  - type: turn_on
+    device_id: b98f46029e65880f81a828851d58c75c
+    entity_id: switch.garage_car_charger_switch
+    domain: switch
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: input_boolean.hourly_consumption_control_reactivate_hvac
+        state: 'on'
+      sequence:
+      - service: climate.set_hvac_mode
+        data:
+          hvac_mode: heat
+        target:
+          entity_id: climate.livingroom_hvac
+    - conditions:
+      - condition: state
+        entity_id: input_boolean.hourly_consumption_control_reactivate_hvac
+        state: 'off'
+      sequence: []
+    default: []
+  mode: single
+- id: '1660737649299'
+  alias: Entrance Ceiling Spot On
+  description: ''
+  trigger:
+  - platform: device
+    type: changed_states
+    device_id: 1c4818df7edfebdb9675d1d6f6f8d03d
+    entity_id: light.shoeroom_spot_1
+    domain: light
+  - platform: state
+    entity_id:
+    - light.shoeroom_spot_1
+    attribute: brightness
+  condition: []
+  action:
+  - data_template:
+      brightness: "{% set new_level = trigger.to_state.attributes.brightness|int %}
+        \ {% if 0 < new_level < 20 %}\n  20\n{% elif 150 < new_level < 256 %}\n  150\n{%
+        else %}\n  {{ new_level }}\n{% endif %}"
+      entity_id:
+      - light.entrance_ceiling_spot
+    service: light.turn_on
+  mode: single
+- id: '1661332540928'
+  alias: Outdoor Lights On - Sunset
+  description: ''
+  trigger:
+  - platform: sun
+    event: sunset
+    offset: -00:30
+  condition: []
+  action:
+  - service: light.turn_on
+    data:
+      transition: 20
+    target:
+      entity_id: light.z2m_outdoors
+  mode: single
+- id: '1661332585538'
+  alias: Outdoor Lights Off - Sunrise
+  description: ''
+  trigger:
+  - platform: sun
+    event: sunrise
+    offset: 00:30
+  condition: []
+  action:
+  - service: light.turn_off
+    data:
+      transition: 30
+    target:
+      entity_id: light.z2m_outdoors
+  mode: single

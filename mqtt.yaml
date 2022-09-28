@@ -1,0 +1,81 @@
+broker: "192.168.5.36"
+port: 1883
+username: "magnus"
+password: !secret MQTT_PASSWORD
+sensor:
+  - name: "AMS - Power Active"
+    state_topic: "ams/meter/import/active"
+    unit_of_measurement: "W"
+    state_class: "measurement"
+    device_class: "power"
+    unique_id: 7748777e-c863-467d-b86c-b9d0ad43934b
+
+  - name: "AMS - Power Reactive"
+    state_topic: "ams/meter/import/reactive"
+    unit_of_measurement: "W"
+    state_class: "measurement"
+    device_class: "power"
+    unique_id: 6ce8b1d1-2640-40df-a35f-9eff61ae24a9
+
+  - name: "AMS - Power Active Accumulated"
+    state_topic: "ams/meter/import/active/accumulated1"
+    unit_of_measurement: "kWh"
+    state_class: "total"
+    device_class: "energy"
+    unique_id: 663f10de-41bc-49bc-b8ec-ce882451397f
+
+  - name: "AMS - Power Reactive Accumulated"
+    state_topic: "ams/meter/import/reactive/accumulated"
+    unit_of_measurement: "kWh"
+    state_class: "total"
+    device_class: "energy"
+    unique_id: 4250ed75-17c8-42c3-947b-84c906bb1a1a
+
+  - name: "AMS - Current 1"
+    state_topic: "ams/meter/l1/current"
+    unit_of_measurement: "A"
+    state_class: "measurement"
+    device_class: "current"
+    unique_id: ed6a9f2c-7be5-430e-91c2-6ee8c6eaedfb
+
+  - name: "AMS - Current 2"
+    state_topic: "ams/meter/l2/current"
+    unit_of_measurement: "A"
+    state_class: "measurement"
+    device_class: "current"
+    unique_id: c6e3ee5c-3ebf-4009-baf6-e19ecc347413
+
+  - name: "AMS - Current 3"
+    state_topic: "ams/meter/l3/current"
+    unit_of_measurement: "A"
+    state_class: "measurement"
+    device_class: "current"
+    unique_id: f27e1ee8-c66c-4100-a467-7d4c72109325
+
+  - name: "AMS - Voltage 1"
+    state_topic: "ams/meter/l1/voltage"
+    unit_of_measurement: "V"
+    state_class: "measurement"
+    device_class: "voltage"
+    unique_id: 060c49b1-21ec-45e3-b153-663ff85183f2
+
+  - name: "AMS - Voltage 2"
+    state_topic: "ams/meter/l2/voltage"
+    unit_of_measurement: "V"
+    state_class: "measurement"
+    device_class: "voltage"
+    unique_id: bceaaa15-7b6b-453a-85ec-c9967463148b
+
+  - name: "AMS - Voltage 3"
+    state_topic: "ams/meter/l3/voltage"
+    unit_of_measurement: "V"
+    state_class: "measurement"
+    device_class: "voltage"
+    unique_id: a8a6d8c5-35eb-44ef-b307-6e0496649b16
+
+  - name: "AMS - Power Factor"
+    state_topic: "ams/meter/powerfactor"
+    unit_of_measurement: "%"
+    state_class: "measurement"
+    device_class: "power_factor"
+    unique_id: 06463e53-4731-4ca2-b566-247119879e7b

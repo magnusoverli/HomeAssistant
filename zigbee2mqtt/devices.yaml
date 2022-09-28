@@ -1,0 +1,102 @@
+'0x60a423fffe7eb69b':
+  friendly_name: attic_fan_heater
+'0x804b50fffe101252':
+  friendly_name: guestroom_desktop_lamp
+'0x60a423fffead6887':
+  friendly_name: livingroom_hvac
+  measurement_poll_interval: 5
+  power_calibration: 0
+'0x14b457fffe743e38':
+  friendly_name: guestroom_spot_1
+'0x14b457fffe6957f6':
+  friendly_name: guestroom_spot_3
+'0x14b457fffe744a8e':
+  friendly_name: guestroom_spot_2
+'0x5c0272fffe49e877':
+  friendly_name: guestroom_remote
+'0x000b57fffe13cc67':
+  friendly_name: livingroom_salon_lamp
+'0x0c4314fffe572f30':
+  friendly_name: livingroom_remote
+'0x000b57fffe9934ff':
+  friendly_name: livingroom_spot_1
+'0x000b57fffe982754':
+  friendly_name: livingroom_spot_2
+'0x000b57fffe98bfaf':
+  friendly_name: livingroom_spot_3
+'0x000b57fffe24e5bf':
+  friendly_name: livingroom_corner_lamp
+'0x000b57fffebed86e':
+  friendly_name: kitchen_spot_1
+'0x000b57fffebde818':
+  friendly_name: kitchen_spot_2
+'0x000b57fffebfda61':
+  friendly_name: kitchen_spot_3
+'0x000b57fffee79a4e':
+  friendly_name: kitchen_ventilator_1
+'0x000b57fffee6b08f':
+  friendly_name: kitchen_ventilator_2
+'0x842e14fffe496b27':
+  friendly_name: kitchen_countertop_lamp
+'0x000b57fffe32a79f':
+  friendly_name: bathroom_remote
+'0x000b57fffe236d81':
+  friendly_name: bathroom_spot_1
+'0x000b57fffe127242':
+  friendly_name: bathroom_spot_2
+'0x000b57fffe2af23e':
+  friendly_name: bathroom_spot_3
+'0x000b57fffe24f6cf':
+  friendly_name: bathroom_spot_4
+'0x000b57fffeb217ec':
+  friendly_name: bathroom_mirror
+'0x000b57fffe8f191c':
+  friendly_name: hall_wall_lamp
+'0x000b57fffea39781':
+  friendly_name: hall_spot_3
+'0x000b57fffe5219e2':
+  friendly_name: hall_spot_2
+'0x000b57fffeacf5a8':
+  friendly_name: hall_spot_1
+'0x90fd9ffffe2a3beb':
+  friendly_name: entrance_lamp
+'0x90fd9ffffe0f82fe':
+  friendly_name: shoeroom_spot_1
+'0x90fd9ffffe0f7b74':
+  friendly_name: shoeroom_spot_2
+'0x000b57fffed5c14a':
+  friendly_name: shoeroom_spot_3
+'0x000b57fffe4bd192':
+  friendly_name: hall_remote
+'0x000b57fffee724c6':
+  friendly_name: booth_remote
+'0x847127fffebebb83':
+  friendly_name: booth_spot_1
+'0x000b57fffe9e18f3':
+  friendly_name: booth_spot_2
+'0xb4e3f9fffe8ddf96':
+  friendly_name: outdoor_garage_1
+'0xb4e3f9fffe3a9dfd':
+  friendly_name: outdoor_porch_2
+'0x680ae2fffef1cba3':
+  friendly_name: garage_door
+'0x14b457fffe3cd8f0':
+  friendly_name: outdoor_porch_1
+'0x00158d00079b1c1e':
+  friendly_name: livingroom_air_sensor
+  temperature_precision: 1
+  humidity_precision: 1
+  humidity_calibration: 0
+  pressure_precision: 0
+'0x00158d00079ae155':
+  friendly_name: Sensor 2
+'0xd0cf5efffe2d3577':
+  friendly_name: attic_lamp_2
+'0xd0cf5efffe22cc99':
+  friendly_name: attic_lamp_1
+'0x000b57fffeb31ee8':
+  friendly_name: '0x000b57fffeb31ee8'
+'0x00158d00044afb0b':
+  friendly_name: porch_temp
+'0x000b57fffe2aec77':
+  friendly_name: bathroom_spot_5

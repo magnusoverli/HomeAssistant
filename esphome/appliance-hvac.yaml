@@ -1,0 +1,54 @@
+substitutions:
+  devicename: hvac
+  upper_devicename: Livingroom HVAC
+  hardware: NodeMCU
+
+esphome:
+  name: "$devicename"
+  comment: "$upper_devicename - $hardware"
+  platform: ESP8266
+  board: d1_mini
+
+wifi:
+  reboot_timeout: 10min
+  networks:
+  - ssid: !secret wifi_ssid_2
+    password: !secret wifi_password_2
+
+logger:
+
+api:
+  reboot_timeout: 0s
+
+ota:
+  password: !secret ota_password
+
+time:
+  - platform: homeassistant
+    id: homeassistant_time
+
+remote_receiver:
+  id: receiver
+  pin:
+    number: D4
+    inverted: true
+  dump: all
+
+remote_transmitter:
+  pin: D1
+  carrier_duty_percent: 50%
+
+climate:
+  - platform: toshiba
+    model: generic
+    name: "Livingroom HVAC"
+    receiver_id: receiver
+
+button:
+  - platform: template
+    name: "HVAC Power - 50%"
+    id: hvac_power_50
+    on_press:
+      - remote_transmitter.transmit_samsung:
+          data: 0xF20D03FC01500340
+          nbits: 64

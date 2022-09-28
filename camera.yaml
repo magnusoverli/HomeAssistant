@@ -1,0 +1,4 @@
+- platform: generic
+  name: roborock
+  still_image_url: http://192.168.5.47:4000/api/map/image
+  verify_ssl: false

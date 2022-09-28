@@ -1,0 +1,2 @@
+sensor.lights_consumption_total_daily:
+  device_class: energy

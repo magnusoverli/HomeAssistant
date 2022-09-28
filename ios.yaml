@@ -1,0 +1,10 @@
+push:
+  categories:
+    - name: garage_door
+      identifier: 'garage_door'
+      actions:
+        - identifier: 'Close Garage Door'
+          title: 'Close Garage Door'
+          activationMode: 'background'
+          authenticationRequired: false
+          destructive: false

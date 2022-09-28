@@ -1,0 +1,32 @@
+master_bedroom_namron_dimmer_daily_energy_utility:
+  source: sensor.namron_200w_dimmer_electric_consumed_kwh
+  cycle: daily
+
+kitchen_spot_dimmer_daily_energy_utility:
+  source: sensor.kitchen_spot_dimmer_electric_consumed_kwh
+  cycle: daily
+
+lights_daily_consumption:
+  name: Lights - Consumption
+  source: sensor.lights_consumption_historic
+  cycle: daily
+
+attic_freezer_daily_energy_utility:
+  name: Attic Freezer - Consumption
+  source: sensor.attic_freezer_power_plug_electric_consumed_kwh
+  cycle: daily
+
+hvac_energy_daily:
+  name: Hvac
+  source: sensor.livingroom_hvac_energy
+  cycle: daily
+
+attic_fan_heater_energy_daily:
+  name: Attic Fan Heater Daily
+  source: sensor.attic_fan_heater_energy
+  cycle: daily
+
+kids_bedroom_floor_heating_energy_daily:
+  name: Kids Bedroom
+  source: sensor.kids_bedroom_floor_heating_electric_consumption_kwh
+  cycle: daily

@@ -1,0 +1,8 @@
+zwave:
+  title: "ZWave"
+  url: "https://zwave.magnusoverli.duckdns.org/"
+  icon: "mdi:z-wave"
+zigbee:
+  title: "Zigbee"
+  url: "https://zigbee.magnusoverli.duckdns.org/"
+  icon: mdi:zigbee

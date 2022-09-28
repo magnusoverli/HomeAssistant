@@ -1,0 +1,2 @@
+client_id: !secret home_connect_clientid
+client_secret: !secret home_connect_clientsecret

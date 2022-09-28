@@ -1,0 +1,102 @@
+image:
+  ## GarageDoorIcons ##
+  - file: "images/garage-open-post.png"
+    id: garage_open
+    type: GRAYSCALE
+    resize: 53x53
+
+  - file: "images/garage-closed-post.png"
+    id: garage_closed
+    type: GRAYSCALE
+    resize: 53x53
+
+  ## Car icons
+  - file: "images/plugged.png"
+    id: plugged
+    type: GRAYSCALE
+    resize: 24x24
+
+  - file: "images/unplugged.png"
+    id: unplugged
+    type: GRAYSCALE
+    resize: 25x25
+
+  - file: "images/car.png"
+    id: car
+    type: GRAYSCALE
+    resize: 32x32
+
+  ## Weather icons
+  - file: "images/clear_night.png"
+    id: clear_night
+    type: GRAYSCALE
+
+
+  - file: "images/cloudy.png"
+    id: cloudy
+    type: GRAYSCALE
+
+
+  - file: "images/fog.png"
+    id: fog
+    type: GRAYSCALE
+
+
+  - file: "images/hail.png"
+    id: hail
+    type: GRAYSCALE
+
+
+  - file: "images/lightning.png"
+    id: lightning
+    type: GRAYSCALE
+
+
+  - file: "images/lightning_rainy.png"
+    id: lightning_rainy
+    type: GRAYSCALE
+
+
+  - file: "images/partly_cloudy.png"
+    id: partlycloudy
+    type: GRAYSCALE
+
+
+  - file: "images/pouring.png"
+    id: pouring
+    type: GRAYSCALE
+
+
+  - file: "images/rainy.png"
+    id: rainy
+    type: GRAYSCALE
+
+
+  - file: "images/snowy.png"
+    id: snowy
+    type: GRAYSCALE
+
+
+  - file: "images/snowy_rainy.png"
+    id: snowy_rainy
+    type: GRAYSCALE
+
+
+  - file: "images/sunny.png"
+    id: sunny
+    type: GRAYSCALE
+
+
+  - file: "images/windy.png"
+    id: windy
+    type: GRAYSCALE
+
+
+  - file: "images/windy_variant.png"
+    id: windy_variant
+    type: GRAYSCALE
+
+
+  - file: "images/exceptional.png"
+    id: exceptional
+    type: GRAYSCALE

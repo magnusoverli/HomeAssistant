@@ -1,0 +1,952 @@
+substitutions:
+  devicename: entrance_ttgo
+  upper_devicename: Entrance TTGO
+  hardware: TTGO T-display (ESP32)
+
+esphome:
+  name: "$devicename"
+  comment: "$upper_devicename - $hardware"
+  platform: ESP32
+  #board: esp32dev
+  board: esp-wrover-kit
+
+wifi:
+  reboot_timeout: 10min
+  networks:
+  - ssid: !secret wifi_ssid
+    password: !secret wifi_password
+
+ota:
+  password: !secret ota_password
+
+logger:
+
+api:
+  reboot_timeout: 0s
+
+time:
+  - platform: homeassistant
+    id: esptime
+
+spi:
+  clk_pin: GPIO18
+  mosi_pin: GPIO19
+
+<<: !include includes/images.yaml
+
+text_sensor:
+  - platform: homeassistant
+    entity_id: cover.garage_door
+    id: garage_door
+    internal: true
+  - platform: homeassistant
+    entity_id: sensor.my_date_time
+    id: my_date_time
+    internal: true
+  - platform: homeassistant
+    name: "Weather"
+    entity_id: weather.furulien
+    id: weather
+    internal: true
+
+sensor:
+  - platform: homeassistant
+    id: outside_temperature
+    entity_id: sensor.outside_temperature
+    internal: true
+  - platform: homeassistant
+    id: car_range
+    entity_id: sensor.gte_electric_range
+    internal: true
+  - platform: homeassistant
+    id: precipitation_now
+    entity_id: sensor.weather_current_precipitation
+    internal: true
+  - platform: homeassistant
+    id: precipitation_1
+    entity_id: sensor.weather_1_precipitation
+    internal: true
+  - platform: homeassistant
+    id: precipitation_2
+    entity_id: sensor.weather_2_precipitation
+    internal: true
+  - platform: homeassistant
+    id: precipitation_3
+    entity_id: sensor.weather_3_precipitation
+    internal: true
+  - platform: homeassistant
+    id: precipitation_4
+    entity_id: sensor.weather_4_precipitation
+    internal: true
+
+binary_sensor:
+  - platform: template
+    name: "Clear skies"
+    id: clear_skies
+    internal: false
+    lambda: |-
+      if ((id(precipitation_now).state) + (id(precipitation_1).state) + (id(precipitation_2).state) + (id(precipitation_3).state) + (id(precipitation_4).state) < 0.3) {
+        return true;
+      } else {
+        return false;
+      }
+
+  - platform: homeassistant
+    name: "Car is plugged in"
+    id: car_plugged
+    entity_id: binary_sensor.gte_charging_cable_connected
+    internal: true
+
+  - platform: gpio
+    pin:
+      number: GPIO0
+      inverted: true
+    name: "$upper_devicename - Button 2"
+    ## Include on_click action
+    <<: !include includes/on_click.yaml
+
+## FONTS ##
+<<: !include includes/fonts.yaml
+
+color:
+  - id: grey
+    red: 50%
+    green: 50%
+    blue: 50%
+
+  - id: dark_grey
+    red: 30%
+    green: 30%
+    blue: 30%
+
+  - id: darker_grey
+    red: 15%
+    green: 15%
+    blue: 15%
+
+  - id: black
+    red: 0%
+    green: 0%
+    blue: 0%
+
+  - id: white
+    red: 100%
+    green: 100%
+    blue: 100%
+
+  - id: red
+    red: 100%
+    green: 0%
+    blue: 0%
+
+## DISPLAY ##
+display:
+  - platform: st7789v
+    backlight_pin: GPIO4
+    model: TTGO TDisplay 135x240
+    cs_pin: GPIO5
+    dc_pin: GPIO16
+    reset_pin: GPIO23
+    rotation: 90
+    id: my_display
+
+    ## Draw page 1
+    pages:
+      - id: page1
+        lambda: |-
+          // "Splash screen" while booting
+          if (!id(outside_temperature).has_state()) {
+            it.print(40, 45, id(roboto_message), "Connecting to");
+            it.print(40, 68, id(roboto_message), "Home Assistant ...");
+          }
+
+          if (id(outside_temperature).has_state()) {
+
+            // Draw right menu vertical line
+            it.line(163, 0, 163, 135, grey);
+            it.line(164, 0, 164, 135, grey);
+      
+            // Draw right menu first divider and top menu bottom
+            it.line(0, 32, 240, 32, grey);
+            it.line(0, 33, 240, 33, grey);
+      
+            // Draw right menu second divider
+            it.line(163, 62, 240, 62, grey);
+            it.line(163, 63, 240, 63, grey);
+      
+            // Draw right menu third divider
+            it.line(163, 90, 240, 90, grey);
+            it.line(163, 91, 240, 91, grey);
+  
+            // Print outside temperature and time
+            it.strftime(173, 5, id(roboto), "%H:%M", id(esptime).now());
+            it.printf(174, 35, id(roboto), "%.1f°", id(outside_temperature).state);
+
+            // Print car icon and range
+            if (id(car_range).has_state()) {
+              it.image(2, 6, id(car));
+              it.printf(51, 3, id(roboto), "%.0f", id(car_range).state);
+              it.print(91, 10, id(roboto_small), "km");
+            }
+
+            // Print car charging cable state
+            if (id(car_plugged).has_state()){
+              if (id(car_plugged).state){
+                it.image(125, 2, id(plugged));
+              }
+              if (!id(car_plugged).state){
+                it.image(122, 2, id(unplugged));
+              }
+            }
+
+            // Print garage door icon, based on state
+            if (id(garage_door).has_state()){
+              if (id(garage_door).state == "closed")
+                      it.image(174, 95, id(garage_closed));
+              else
+                  it.image(174, 95, id(garage_open));
+            }
+
+            // Print precipitation sensor text
+            if (id(precipitation_now).has_state()) {
+              it.printf(175, 64, id(roboto), "%.1f", id(precipitation_now).state);
+              it.print(208, 68, id(roboto_small), "mm");
+            }
+
+            // Draw chart and precipitation data
+            if(!id(clear_skies).state){
+
+              // 0mm line
+              if (id(precipitation_now).has_state()) {
+                it.line(13, 130, 155, 130, darker_grey);
+                it.print(0, 121, id(roboto_micro), grey, "0");
+              }
+              // 2mm line
+              if (id(precipitation_now).has_state()) {
+                it.line(13, 102, 155, 102, darker_grey);
+                it.print(0, 94, id(roboto_micro), grey, "2");
+              }
+              // 4mm line
+              if (id(precipitation_now).has_state()) {
+                it.line(13, 76, 155, 76, darker_grey);
+                it.print(0, 67, id(roboto_micro), grey, "4");
+              }
+              // 6mm line
+              if (id(precipitation_now).has_state()) {
+                it.line(13, 49, 155, 49, darker_grey);
+                it.print(0, 41, id(roboto_micro), grey, "6");
+              }
+
+              // Current precipitation bar
+              if (id(precipitation_now).has_state()) {
+
+                // If value is 0.0 print tiny line to visualize the slot for the bar
+                if ((id(precipitation_now).state) == 0.0){
+                  int height = roundf((130 - 50) * (id(precipitation_now).state / (6 - 0)));
+                  it.filled_rectangle(25, 130, 10, 1);
+                  it.filled_rectangle(18, 108 - height, 22, 15, black);
+                  it.printf(20, 112 - height, id(roboto_graph), red, "%.1f", id(precipitation_now).state);
+                }
+
+              // If value is 0.1 and 5.5, draw regular bar and value
+              if ((id(precipitation_now).state) >= 0.1 && (id(precipitation_now).state) <= 5.5){
+
+                // Calculate base value for vertical placement
+                int height = roundf((130 - 50) * (id(precipitation_now).state / (6 - 0)));
+
+                // Draw bar
+                it.filled_rectangle(25, 130 - height, 10, height);
+
+                // Draw bakground for value on top of bar
+                it.filled_rectangle(19, 116 - height, 21, 10, black);
+
+                // Draw value on top of bar
+                it.printf(21, 112 - height, id(roboto_graph), red, "%.1f", id(precipitation_now).state);
+              }
+
+              // If value is more than 5.5, draw red bar only
+              if ((id(precipitation_now).state) > 5.5){
+                it.filled_rectangle(25, 40, 10, 90, red);
+              }
+            }
+
+
+              // Draw precipitatoin bar 1 hour from now
+              if (id(precipitation_1).has_state()) {
+                // If value is 0.0 print tiny line to visualize the slot for the bar
+                if ((id(precipitation_1).state) == 0.0){
+                  int height = roundf((130 - 50) * (id(precipitation_1).state / (6 - 0)));
+                  it.filled_rectangle(52, 130, 10, 1);
+                  it.filled_rectangle(45, 108 - height, 22, 15, black);
+                  it.printf(47, 112 - height, id(roboto_graph), red, "%.1f", id(precipitation_1).state);
+                }
+
+                // If value is 0.1 and 5.5, draw regular bar and value
+                if ((id(precipitation_1).state) >= 0.1 && (id(precipitation_1).state) <= 5.5){
+                  int height = roundf((130 - 50) * (id(precipitation_1).state / (6 - 0)));
+                  it.filled_rectangle(52, 130 - height, 10, height);
+                  it.filled_rectangle(46, 118 - height, 21, 8, black);
+                  it.printf(47, 112 - height, id(roboto_graph), red, "%.1f", id(precipitation_1).state);
+                }
+
+                // If value is more than 5.5, draw red bar only
+                if ((id(precipitation_1).state) > 5.5){
+                  it.filled_rectangle(52, 40, 10, 90, red);
+                }
+              }
+
+
+              // Draw precipitatoin bar 2 hours from now
+              if (id(precipitation_2).has_state()) {
+                // If value is 0.0 print tiny line to visualize the slot for the bar
+                if ((id(precipitation_2).state) == 0.0){
+                  int height = roundf((130 - 50) * (id(precipitation_2).state / (6 - 0)));
+                  it.filled_rectangle(79, 130, 10, 1);
+                  it.filled_rectangle(72, 108 - height, 22, 15, black);
+                  it.printf(74, 112 - height, id(roboto_graph), red, "%.1f", id(precipitation_2).state);
+                }
+
+                // If value is 0.1 and 5.5, draw regular bar and value
+                if ((id(precipitation_2).state) >= 0.1 && (id(precipitation_2).state) <= 5.5){
+                  int height = roundf((130 - 50) * (id(precipitation_2).state / (6 - 0)));
+                  it.filled_rectangle(79, 130 - height, 10, height);
+                  it.filled_rectangle(73, 118 - height, 21, 8, black);
+                  it.printf(75, 112 - height, id(roboto_graph), red, "%.1f", id(precipitation_2).state);
+                }
+
+                // If value is more than 5.5, draw red bar only
+                if ((id(precipitation_2).state) > 5.5){
+                  it.filled_rectangle(79, 40, 10, 90, red);
+                }
+              }
+
+              // Draw precipitatoin bar 3 hours from now
+              if (id(precipitation_3).has_state()) {
+                // If value is 0.0 print tiny line to visualize the slot for the bar
+                if ((id(precipitation_3).state) == 0.0){
+                  int height = roundf((130 - 50) * (id(precipitation_3).state / (6 - 0)));
+                  it.filled_rectangle(106, 130, 10, 1);
+                  it.filled_rectangle(99, 108 - height, 22, 15, black);
+                  it.printf(101, 112 - height, id(roboto_graph), red, "%.1f", id(precipitation_3).state);
+                }
+
+                // If value is 0.1 and 5.5, draw regular bar and value
+                if ((id(precipitation_3).state) >= 0.1 && (id(precipitation_3).state) <= 5.5){
+                  int height = roundf((130 - 50) * (id(precipitation_3).state / (6 - 0)));
+                  it.filled_rectangle(106, 130 - height, 10, height);
+                  it.filled_rectangle(100, 118 - height, 21, 8, black);
+                  it.printf(102, 112 - height, id(roboto_graph), red, "%.1f", id(precipitation_3).state);
+                }
+
+                // If value is more than 5.5, draw red bar only
+                if ((id(precipitation_3).state) > 5.5){
+                  it.filled_rectangle(106, 40, 10, 90, red);
+                }
+              }
+
+              // Draw precipitatoin bar 4 hours from now
+              if (id(precipitation_4).has_state()) {
+                // If value is 0.0 print tiny line to visualize the slot for the bar
+                if ((id(precipitation_4).state) == 0.0){
+                  int height = roundf((130 - 50) * (id(precipitation_4).state / (6 - 0)));
+                  it.filled_rectangle(133, 130, 10, 1);
+                  it.filled_rectangle(126, 108 - height, 22, 15, black);
+                  it.printf(128, 112 - height, id(roboto_graph), red, "%.1f", id(precipitation_4).state);
+                }
+
+                // If value is 0.1 and 5.5, draw regular bar and value
+                if ((id(precipitation_4).state) >= 0.1 && (id(precipitation_4).state) <= 5.5){
+                  int height = roundf((130 - 50) * (id(precipitation_4).state / (6 - 0)));
+                  it.filled_rectangle(133, 130 - height, 10, height);
+                  it.filled_rectangle(127, 118 - height, 21, 8, black);
+                  it.printf(129, 112 - height, id(roboto_graph), red, "%.1f", id(precipitation_4).state);
+                }
+
+                // If value is more than 5.5, draw red bar only
+                if ((id(precipitation_4).state) > 5.5){
+                  it.filled_rectangle(133, 40, 10, 90, red);
+                }
+              }
+            }
+
+            // If there is no rain the next few hours, draw weather icon instead of graph
+            if (id(clear_skies).state){
+
+              if (id(weather).state == "clear-night"){
+              it.image(30, 38, id(clear_night));
+              }
+              if (id(weather).state == "cloudy"){
+              it.image(30, 38, id(cloudy));
+              }
+              if (id(weather).state == "fog"){
+              it.image(30, 38, id(fog));
+              }
+              if (id(weather).state == "hail"){
+              it.image(30, 38, id(hail));
+              }
+              if (id(weather).state == "lightning"){
+              it.image(30, 38, id(lightning));
+              }
+              if (id(weather).state == "lightning-rainy"){
+              it.image(30, 38, id(lightning_rainy));
+              }
+              if (id(weather).state == "partlycloudy"){
+              it.image(30, 38, id(partlycloudy));
+              }
+              if (id(weather).state == "pouring"){
+              it.image(30, 38, id(pouring));
+              }
+              if (id(weather).state == "rainy"){
+              it.image(30, 38, id(rainy));
+              }
+              if (id(weather).state == "snowy"){
+              it.image(30, 38, id(snowy));
+              }
+              if (id(weather).state == "snowy-rainy"){
+              it.image(30, 38, id(snowy_rainy));
+              }
+              if (id(weather).state == "sunny"){
+              it.image(30, 38, id(sunny));
+              }
+              if (id(weather).state == "windy"){
+              it.image(30, 38, id(windy));
+              }
+              if (id(weather).state == "windy-variant"){
+              it.image(30, 38, id(windy_variant));
+              }
+              if (id(weather).state == "exceptional"){
+              it.image(30, 38, id(exceptional));
+              }
+            }
+          }
+
+      - id: page2
+        lambda: |-
+          if (!id(outside_temperature).has_state()) {
+            it.print(40, 45, id(roboto_message), "Connecting to");
+            it.print(40, 68, id(roboto_message), "Home Assistant ...");
+          }
+
+          if (id(outside_temperature).has_state()) {
+
+            // Draw right menu vertical line
+            it.line(163, 0, 163, 135, grey);
+            it.line(164, 0, 164, 135, grey);
+      
+            // Draw right menu first divider and top menu bottom
+            it.line(0, 32, 240, 32, grey);
+            it.line(0, 33, 240, 33, grey);
+      
+            // Draw right menu second divider
+            it.line(163, 62, 240, 62, grey);
+            it.line(163, 63, 240, 63, grey);
+      
+            // Draw right menu third divider
+            it.line(163, 90, 240, 90, grey);
+            it.line(163, 91, 240, 91, grey);
+  
+            // Print outside temperature and time
+            it.strftime(173, 5, id(roboto), "%H:%M", id(esptime).now());
+            it.printf(174, 35, id(roboto), "%.1f°", id(outside_temperature).state);
+
+            // Print car icon and range
+            if (id(car_range).has_state()) {
+              it.image(2, 6, id(car));
+              it.printf(51, 3, id(roboto), "%.0f", id(car_range).state);
+              it.print(91, 10, id(roboto_small), "km");
+            }
+
+            // Print car charging cable state
+            if (id(car_plugged).has_state()){
+              if (id(car_plugged).state){
+                it.image(125, 2, id(plugged));
+              }
+              if (!id(car_plugged).state){
+                it.image(122, 2, id(unplugged));
+              }
+            }
+
+            // Print garage door icon, based on state
+            if (id(garage_door).has_state()){
+              if (id(garage_door).state == "closed")
+                      it.image(174, 95, id(garage_closed));
+              else
+                  it.image(174, 95, id(garage_open));
+            }
+
+            // Print precipitation sensor text
+            if (id(precipitation_now).has_state()) {
+              it.printf(175, 64, id(roboto), "%.1f", id(precipitation_now).state);
+              it.print(208, 68, id(roboto_small), "mm");
+            }
+
+            // Draw chart and precipitation data
+            if(!id(clear_skies).state){
+
+              // 0mm line
+              if (id(precipitation_now).has_state()) {
+                it.line(13, 130, 155, 130, darker_grey);
+                it.print(0, 121, id(roboto_micro), grey, "0");
+              }
+              // 2mm line
+              if (id(precipitation_now).has_state()) {
+                it.line(13, 102, 155, 102, darker_grey);
+                it.print(0, 94, id(roboto_micro), grey, "2");
+              }
+              // 4mm line
+              if (id(precipitation_now).has_state()) {
+                it.line(13, 76, 155, 76, darker_grey);
+                it.print(0, 67, id(roboto_micro), grey, "4");
+              }
+              // 6mm line
+              if (id(precipitation_now).has_state()) {
+                it.line(13, 49, 155, 49, darker_grey);
+                it.print(0, 41, id(roboto_micro), grey, "6");
+              }
+
+              // Draw current precipitation bar
+              if (id(precipitation_now).has_state()) {
+                // If value is 0.0 print tiny line to visualize the slot for the bar
+                if ((id(precipitation_now).state) == 0.0){
+                  int height = roundf((130 - 50) * (id(precipitation_now).state / (6 - 0)));
+                  it.filled_rectangle(25, 130, 10, 1);
+                  it.filled_rectangle(18, 108 - height, 22, 15, black);
+                  it.printf(20, 113 - height, id(roboto_graph), red, "%.1f", id(precipitation_now).state);
+                }
+
+              // If value is 0.1 and 5.5, draw regular bar and value
+              if ((id(precipitation_now).state) >= 0.1 && (id(precipitation_now).state) <= 5.5){
+                int height = roundf((130 - 50) * (id(precipitation_now).state / (6 - 0)));
+                it.filled_rectangle(25, 130 - height, 10, height);
+                it.filled_rectangle(18, 108 - height, 22, 15, black);
+                it.printf(20, 113 - height, id(roboto_graph), red, "%.1f", id(precipitation_now).state);
+              }
+
+              // If value is more than 5.5, draw red bar only
+              if ((id(precipitation_now).state) > 5.5){
+                it.filled_rectangle(25, 40, 10, 90, red);
+              }
+            }
+
+
+              // Draw precipitatoin bar 1 hour from now
+              if (id(precipitation_1).has_state()) {
+                // If value is 0.0 print tiny line to visualize the slot for the bar
+                if ((id(precipitation_1).state) == 0.0){
+                  int height = roundf((130 - 50) * (id(precipitation_1).state / (6 - 0)));
+                  it.filled_rectangle(52, 130, 10, 1);
+                  it.filled_rectangle(45, 108 - height, 22, 15, black);
+                  it.printf(47, 113 - height, id(roboto_graph), red, "%.1f", id(precipitation_1).state);
+                }
+
+                // If value is 0.1 and 5.5, draw regular bar and value
+                if ((id(precipitation_1).state) >= 0.1 && (id(precipitation_1).state) <= 5.5){
+                  int height = roundf((130 - 50) * (id(precipitation_1).state / (6 - 0)));
+                  it.filled_rectangle(52, 130 - height, 10, height);
+                  it.filled_rectangle(45, 108 - height, 22, 15, black);
+                  it.printf(47, 113 - height, id(roboto_graph), red, "%.1f", id(precipitation_1).state);
+                }
+
+                // If value is more than 5.5, draw red bar only
+                if ((id(precipitation_1).state) > 5.5){
+                  it.filled_rectangle(52, 40, 10, 90, red);
+                }
+              }
+
+
+              // Draw precipitatoin bar 2 hours from now
+              if (id(precipitation_2).has_state()) {
+                // If value is 0.0 print tiny line to visualize the slot for the bar
+                if ((id(precipitation_2).state) == 0.0){
+                  int height = roundf((130 - 50) * (id(precipitation_2).state / (6 - 0)));
+                  it.filled_rectangle(79, 130, 10, 1);
+                  it.filled_rectangle(72, 108 - height, 22, 15, black);
+                  it.printf(74, 111 - height, id(roboto_graph), red, "%.1f", id(precipitation_2).state);
+                }
+
+                // If value is 0.1 and 5.5, draw regular bar and value
+                if ((id(precipitation_2).state) >= 0.1 && (id(precipitation_2).state) <= 5.5){
+                  int height = roundf((130 - 50) * (id(precipitation_2).state / (6 - 0)));
+                  it.filled_rectangle(79, 130 - height, 10, height);
+                  it.filled_rectangle(72, 108 - height, 22, 15, black);
+                  it.printf(74, 111 - height, id(roboto_graph), red, "%.1f", id(precipitation_2).state);
+                }
+
+                // If value is more than 5.5, draw red bar only
+                if ((id(precipitation_2).state) > 5.5){
+                  it.filled_rectangle(79, 40, 10, 90, red);
+                }
+              }
+
+              // Draw precipitatoin bar 3 hours from now
+              if (id(precipitation_3).has_state()) {
+                // If value is 0.0 print tiny line to visualize the slot for the bar
+                if ((id(precipitation_3).state) == 0.0){
+                  int height = roundf((130 - 50) * (id(precipitation_3).state / (6 - 0)));
+                  it.filled_rectangle(106, 130, 10, 1);
+                  it.filled_rectangle(99, 108 - height, 22, 15, black);
+                  it.printf(101, 111 - height, id(roboto_graph), red, "%.1f", id(precipitation_3).state);
+                }
+
+                // If value is 0.1 and 5.5, draw regular bar and value
+                if ((id(precipitation_3).state) >= 0.1 && (id(precipitation_3).state) <= 5.5){
+                  int height = roundf((130 - 50) * (id(precipitation_3).state / (6 - 0)));
+                  it.filled_rectangle(106, 130 - height, 10, height);
+                  it.filled_rectangle(99, 108 - height, 22, 15, black);
+                  it.printf(101, 111 - height, id(roboto_graph), red, "%.1f", id(precipitation_3).state);
+                }
+
+                // If value is more than 5.5, draw red bar only
+                if ((id(precipitation_3).state) > 5.5){
+                  it.filled_rectangle(106, 40, 10, 90, red);
+                }
+              }
+
+              // Draw precipitatoin bar 4 hours from now
+              if (id(precipitation_4).has_state()) {
+                // If value is 0.0 print tiny line to visualize the slot for the bar
+                if ((id(precipitation_4).state) == 0.0){
+                  int height = roundf((130 - 50) * (id(precipitation_4).state / (6 - 0)));
+                  it.filled_rectangle(133, 130, 10, 1);
+                  it.filled_rectangle(126, 108 - height, 22, 15, black);
+                  it.printf(128, 111 - height, id(roboto_graph), red, "%.1f", id(precipitation_4).state);
+                }
+
+                // If value is 0.1 and 5.5, draw regular bar and value
+                if ((id(precipitation_4).state) >= 0.1 && (id(precipitation_4).state) <= 5.5){
+                  int height = roundf((130 - 50) * (id(precipitation_4).state / (6 - 0)));
+                  it.filled_rectangle(133, 130 - height, 10, height);
+                  it.filled_rectangle(126, 108 - height, 22, 15, black);
+                  it.printf(128, 111 - height, id(roboto_graph), red, "%.1f", id(precipitation_4).state);
+                }
+
+                // If value is more than 5.5, draw red bar only
+                if ((id(precipitation_4).state) > 5.5){
+                  it.filled_rectangle(133, 40, 10, 90, red);
+                }
+              }
+            }
+
+            // If there is no rain the next few hours, draw weather icon instead of graph
+            if (id(clear_skies).state){
+
+              if (id(weather).state == "clear-night"){
+              it.image(30, 38, id(clear_night));
+              }
+              if (id(weather).state == "cloudy"){
+              it.image(30, 38, id(cloudy));
+              }
+              if (id(weather).state == "fog"){
+              it.image(30, 38, id(fog));
+              }
+              if (id(weather).state == "hail"){
+              it.image(30, 38, id(hail));
+              }
+              if (id(weather).state == "lightning"){
+              it.image(30, 38, id(lightning));
+              }
+              if (id(weather).state == "lightning-rainy"){
+              it.image(30, 38, id(lightning_rainy));
+              }
+              if (id(weather).state == "partlycloudy"){
+              it.image(30, 38, id(partlycloudy));
+              }
+              if (id(weather).state == "pouring"){
+              it.image(30, 38, id(pouring));
+              }
+              if (id(weather).state == "rainy"){
+              it.image(30, 38, id(rainy));
+              }
+              if (id(weather).state == "snowy"){
+              it.image(30, 38, id(snowy));
+              }
+              if (id(weather).state == "snowy-rainy"){
+              it.image(30, 38, id(snowy_rainy));
+              }
+              if (id(weather).state == "sunny"){
+              it.image(30, 38, id(sunny));
+              }
+              if (id(weather).state == "windy"){
+              it.image(30, 38, id(windy));
+              }
+              if (id(weather).state == "windy-variant"){
+              it.image(30, 38, id(windy_variant));
+              }
+              if (id(weather).state == "exceptional"){
+              it.image(30, 38, id(exceptional));
+              }
+            }
+          // Draw boxes for onscreen message
+          it.filled_rectangle(11, 46, 135, 80, black);
+          it.rectangle(11, 46, 135, 80, white);
+          }
+
+
+      - id: page3
+        lambda: |-
+          if (!id(outside_temperature).has_state()) {
+            it.print(40, 45, id(roboto_message), "Connecting to");
+            it.print(40, 68, id(roboto_message), "Home Assistant ...");
+          }
+
+          if (id(outside_temperature).has_state()) {
+
+            // Draw right menu vertical line
+            it.line(163, 0, 163, 135, grey);
+            it.line(164, 0, 164, 135, grey);
+      
+            // Draw right menu first divider and top menu bottom
+            it.line(0, 32, 240, 32, grey);
+            it.line(0, 33, 240, 33, grey);
+      
+            // Draw right menu second divider
+            it.line(163, 62, 240, 62, grey);
+            it.line(163, 63, 240, 63, grey);
+      
+            // Draw right menu third divider
+            it.line(163, 90, 240, 90, grey);
+            it.line(163, 91, 240, 91, grey);
+  
+            // Print outside temperature and time
+            it.strftime(173, 5, id(roboto), "%H:%M", id(esptime).now());
+            it.printf(174, 35, id(roboto), "%.1f°", id(outside_temperature).state);
+
+            // Print car icon and range
+            if (id(car_range).has_state()) {
+              it.image(2, 6, id(car));
+              it.printf(51, 3, id(roboto), "%.0f", id(car_range).state);
+              it.print(91, 10, id(roboto_small), "km");
+            }
+
+            // Print car charging cable state
+            if (id(car_plugged).has_state()){
+              if (id(car_plugged).state){
+                it.image(125, 2, id(plugged));
+              }
+              if (!id(car_plugged).state){
+                it.image(122, 2, id(unplugged));
+              }
+            }
+
+            // Print garage door icon, based on state
+            if (id(garage_door).has_state()){
+              if (id(garage_door).state == "closed")
+                      it.image(174, 95, id(garage_closed));
+              else
+                  it.image(174, 95, id(garage_open));
+            }
+
+            // Print precipitation sensor text
+            if (id(precipitation_now).has_state()) {
+              it.printf(175, 64, id(roboto), "%.1f", id(precipitation_now).state);
+              it.print(208, 68, id(roboto_small), "mm");
+            }
+
+            // Draw chart and precipitation data
+            if(!id(clear_skies).state){
+
+              // 0mm line
+              if (id(precipitation_now).has_state()) {
+                it.line(13, 130, 155, 130, darker_grey);
+                it.print(0, 121, id(roboto_micro), grey, "0");
+              }
+              // 2mm line
+              if (id(precipitation_now).has_state()) {
+                it.line(13, 102, 155, 102, darker_grey);
+                it.print(0, 94, id(roboto_micro), grey, "2");
+              }
+              // 4mm line
+              if (id(precipitation_now).has_state()) {
+                it.line(13, 76, 155, 76, darker_grey);
+                it.print(0, 67, id(roboto_micro), grey, "4");
+              }
+              // 6mm line
+              if (id(precipitation_now).has_state()) {
+                it.line(13, 49, 155, 49, darker_grey);
+                it.print(0, 41, id(roboto_micro), grey, "6");
+              }
+
+              // Draw current precipitation bar
+              if (id(precipitation_now).has_state()) {
+                // If value is 0.0 print tiny line to visualize the slot for the bar
+                if ((id(precipitation_now).state) == 0.0){
+                  int height = roundf((130 - 50) * (id(precipitation_now).state / (6 - 0)));
+                  it.filled_rectangle(25, 130, 10, 1);
+                  it.filled_rectangle(18, 108 - height, 22, 15, black);
+                  it.printf(20, 113 - height, id(roboto_graph), red, "%.1f", id(precipitation_now).state);
+                }
+
+              // If value is 0.1 and 5.5, draw regular bar and value
+              if ((id(precipitation_now).state) >= 0.1 && (id(precipitation_now).state) <= 5.5){
+                int height = roundf((130 - 50) * (id(precipitation_now).state / (6 - 0)));
+                it.filled_rectangle(25, 130 - height, 10, height);
+                it.filled_rectangle(18, 108 - height, 22, 15, black);
+                it.printf(20, 113 - height, id(roboto_graph), red, "%.1f", id(precipitation_now).state);
+              }
+
+              // If value is more than 5.5, draw red bar only
+              if ((id(precipitation_now).state) > 5.5){
+                it.filled_rectangle(25, 40, 10, 90, red);
+              }
+            }
+
+
+              // Draw precipitatoin bar 1 hour from now
+              if (id(precipitation_1).has_state()) {
+                // If value is 0.0 print tiny line to visualize the slot for the bar
+                if ((id(precipitation_1).state) == 0.0){
+                  int height = roundf((130 - 50) * (id(precipitation_1).state / (6 - 0)));
+                  it.filled_rectangle(52, 130, 10, 1);
+                  it.filled_rectangle(45, 108 - height, 22, 15, black);
+                  it.printf(47, 113 - height, id(roboto_graph), red, "%.1f", id(precipitation_1).state);
+                }
+
+                // If value is 0.1 and 5.5, draw regular bar and value
+                if ((id(precipitation_1).state) >= 0.1 && (id(precipitation_1).state) <= 5.5){
+                  int height = roundf((130 - 50) * (id(precipitation_1).state / (6 - 0)));
+                  it.filled_rectangle(52, 130 - height, 10, height);
+                  it.filled_rectangle(45, 108 - height, 22, 15, black);
+                  it.printf(47, 113 - height, id(roboto_graph), red, "%.1f", id(precipitation_1).state);
+                }
+
+                // If value is more than 5.5, draw red bar only
+                if ((id(precipitation_1).state) > 5.5){
+                  it.filled_rectangle(52, 40, 10, 90, red);
+                }
+              }
+
+
+              // Draw precipitatoin bar 2 hours from now
+              if (id(precipitation_2).has_state()) {
+                // If value is 0.0 print tiny line to visualize the slot for the bar
+                if ((id(precipitation_2).state) == 0.0){
+                  int height = roundf((130 - 50) * (id(precipitation_2).state / (6 - 0)));
+                  it.filled_rectangle(79, 130, 10, 1);
+                  it.filled_rectangle(72, 108 - height, 22, 15, black);
+                  it.printf(74, 111 - height, id(roboto_graph), red, "%.1f", id(precipitation_2).state);
+                }
+
+                // If value is 0.1 and 5.5, draw regular bar and value
+                if ((id(precipitation_2).state) >= 0.1 && (id(precipitation_2).state) <= 5.5){
+                  int height = roundf((130 - 50) * (id(precipitation_2).state / (6 - 0)));
+                  it.filled_rectangle(79, 130 - height, 10, height);
+                  it.filled_rectangle(72, 108 - height, 22, 15, black);
+                  it.printf(74, 111 - height, id(roboto_graph), red, "%.1f", id(precipitation_2).state);
+                }
+
+                // If value is more than 5.5, draw red bar only
+                if ((id(precipitation_2).state) > 5.5){
+                  it.filled_rectangle(79, 40, 10, 90, red);
+                }
+              }
+
+              // Draw precipitatoin bar 3 hours from now
+              if (id(precipitation_3).has_state()) {
+                // If value is 0.0 print tiny line to visualize the slot for the bar
+                if ((id(precipitation_3).state) == 0.0){
+                  int height = roundf((130 - 50) * (id(precipitation_3).state / (6 - 0)));
+                  it.filled_rectangle(106, 130, 10, 1);
+                  it.filled_rectangle(99, 108 - height, 22, 15, black);
+                  it.printf(101, 111 - height, id(roboto_graph), red, "%.1f", id(precipitation_3).state);
+                }
+
+                // If value is 0.1 and 5.5, draw regular bar and value
+                if ((id(precipitation_3).state) >= 0.1 && (id(precipitation_3).state) <= 5.5){
+                  int height = roundf((130 - 50) * (id(precipitation_3).state / (6 - 0)));
+                  it.filled_rectangle(106, 130 - height, 10, height);
+                  it.filled_rectangle(99, 108 - height, 22, 15, black);
+                  it.printf(101, 111 - height, id(roboto_graph), red, "%.1f", id(precipitation_3).state);
+                }
+
+                // If value is more than 5.5, draw red bar only
+                if ((id(precipitation_3).state) > 5.5){
+                  it.filled_rectangle(106, 40, 10, 90, red);
+                }
+              }
+
+              // Draw precipitatoin bar 4 hours from now
+              if (id(precipitation_4).has_state()) {
+                // If value is 0.0 print tiny line to visualize the slot for the bar
+                if ((id(precipitation_4).state) == 0.0){
+                  int height = roundf((130 - 50) * (id(precipitation_4).state / (6 - 0)));
+                  it.filled_rectangle(133, 130, 10, 1);
+                  it.filled_rectangle(126, 108 - height, 22, 15, black);
+                  it.printf(128, 111 - height, id(roboto_graph), red, "%.1f", id(precipitation_4).state);
+                }
+
+                // If value is 0.1 and 5.5, draw regular bar and value
+                if ((id(precipitation_4).state) >= 0.1 && (id(precipitation_4).state) <= 5.5){
+                  int height = roundf((130 - 50) * (id(precipitation_4).state / (6 - 0)));
+                  it.filled_rectangle(133, 130 - height, 10, height);
+                  it.filled_rectangle(126, 108 - height, 22, 15, black);
+                  it.printf(128, 111 - height, id(roboto_graph), red, "%.1f", id(precipitation_4).state);
+                }
+
+                // If value is more than 5.5, draw red bar only
+                if ((id(precipitation_4).state) > 5.5){
+                  it.filled_rectangle(133, 40, 10, 90, red);
+                }
+              }
+            }
+
+            // If there is no rain the next few hours, draw weather icon instead of graph
+            if (id(clear_skies).state){
+
+              if (id(weather).state == "clear-night"){
+              it.image(30, 38, id(clear_night));
+              }
+              if (id(weather).state == "cloudy"){
+              it.image(30, 38, id(cloudy));
+              }
+              if (id(weather).state == "fog"){
+              it.image(30, 38, id(fog));
+              }
+              if (id(weather).state == "hail"){
+              it.image(30, 38, id(hail));
+              }
+              if (id(weather).state == "lightning"){
+              it.image(30, 38, id(lightning));
+              }
+              if (id(weather).state == "lightning-rainy"){
+              it.image(30, 38, id(lightning_rainy));
+              }
+              if (id(weather).state == "partlycloudy"){
+              it.image(30, 38, id(partlycloudy));
+              }
+              if (id(weather).state == "pouring"){
+              it.image(30, 38, id(pouring));
+              }
+              if (id(weather).state == "rainy"){
+              it.image(30, 38, id(rainy));
+              }
+              if (id(weather).state == "snowy"){
+              it.image(30, 38, id(snowy));
+              }
+              if (id(weather).state == "snowy-rainy"){
+              it.image(30, 38, id(snowy_rainy));
+              }
+              if (id(weather).state == "sunny"){
+              it.image(30, 38, id(sunny));
+              }
+              if (id(weather).state == "windy"){
+              it.image(30, 38, id(windy));
+              }
+              if (id(weather).state == "windy-variant"){
+              it.image(30, 38, id(windy_variant));
+              }
+              if (id(weather).state == "exceptional"){
+              it.image(30, 38, id(exceptional));
+              }
+            }
+            // Draw boxes for onscreen message
+            it.filled_rectangle(11, 46, 135, 80, black);
+            it.rectangle(11, 46, 135, 80, white);
+            // Print onscreen message
+            if (id(garage_door).state == "closed"){
+              it.print(55, 64, id(roboto_message), red, "Åpner");
+            }
+            if (id(garage_door).state == "open"){
+              it.print(55, 64, id(roboto_message), red, "Lukker");
+            }
+            it.print(22, 86, id(roboto_message), red, "garasjeporten");
+          }

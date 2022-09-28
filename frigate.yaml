@@ -1,0 +1,20 @@
+mqtt:
+  host: 192.168.5.36
+
+detectors:
+  cpu1:
+    type: cpu
+    num_threads: 4
+
+cameras:
+  garage: # <------ Name the camera
+    ffmpeg:
+      inputs:
+        - path: rtsp://admin:PQOQLI@192.168.5.58/
+          roles:
+            - detect
+    rtmp:
+      enabled: False # <-- RTMP should be disabled if your stream is not H264
+    detect:
+      width: 1920
+      height: 1080

@@ -1,0 +1,30 @@
+font:
+  - file: "Roboto-Bold.ttf"
+    id: roboto
+    size: 21
+    <<: !include glyphs.yaml
+
+  - file: "Roboto-Bold.ttf"
+    id: roboto_small
+    size: 13
+    <<: !include glyphs.yaml
+
+  - file: "Roboto-Bold.ttf"
+    id: roboto_large
+    size: 23
+    <<: !include glyphs.yaml
+
+  - file: "Roboto-Bold.ttf"
+    id: roboto_message
+    size: 18
+    <<: !include glyphs.yaml
+
+  - file: "Roboto-Bold.ttf"
+    id: roboto_micro
+    size: 14
+    <<: !include glyphs.yaml
+
+  - file: "Roboto-Light.ttf"
+    id: roboto_graph
+    size: 13
+    <<: !include glyphs.yaml

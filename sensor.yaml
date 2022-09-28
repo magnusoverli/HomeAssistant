@@ -1,0 +1,167 @@
+- platform: time_date
+  display_options:
+    - "time"
+    - "date"
+    - "date_time"
+    - "date_time_utc"
+    - "date_time_iso"
+    - "time_date"
+    - "time_utc"
+    - "beat"
+
+- platform: statistics
+  entity_id: sensor.attic_freezer_power
+  sampling_size: 5
+  max_age: 8
+  precision: 2
+
+- platform: version
+
+# Converting version tag string to integer
+- platform: template
+  sensors:
+    wau28p_program_current:
+      friendly_name: WAU28P Program Current
+      value_template: >-
+        {% for i in states.switch if i.object_id.startswith('wau28p_program_') %}
+        {{i.entity_id.replace('switch.wau28p_program_','') | capitalize if is_state(i.entity_id, 'on')}}
+        {% endfor %}
+    wau28p_program_remaining:
+      friendly_name: WAU28P Program Remaining
+      value_template: >-
+        {% if is_state('sensor.wau28p_remaining_program_time', 'unavailable') %}
+        00:00
+        {% else %}
+        {{ (((as_timestamp(states('sensor.wau28p_remaining_program_time')) | int) -3600) - (as_timestamp(now())) | int) | timestamp_custom('%H:%M') }}
+        {% endif %}
+
+    ############################
+    ## Data for ESPhome nodes ##
+    ############################
+    garage_door_norwegian:
+      friendly_name: "GarageDoor Norwegian"
+      value_template: >-
+        {% if is_state('cover.garage_door', 'closed') %}
+          Lukket
+        {% else %}
+          Åpen
+        {% endif %}
+
+    outside_temperature:
+      friendly_name: "Outside Temperatue"
+      value_template: "{{ (states('sensor.porch_air_sensor_temperature') | round(1, 'ceil') | float)}}"
+      unit_of_measurement: "ºC"
+
+    my_date_time:
+      friendly_name: "Date and time"
+      value_template: "{{ as_timestamp(states('sensor.date_time_iso')) | timestamp_custom('%d.%m.%y  %H:%M') }}"
+      icon_template: mdi:calendar-clock
+
+    precipitation_3_hours:
+      friendly_name: "Precipitation next 3 hours"
+      value_template: "{{ (states('sensor.weather_current_precipitation') | float(0.0)) + (states('sensor.weather_current_precipitation') | float(0.0) ) + (states('sensor.weather_current_precipitation') | float ) |round(0) }}"
+      icon_template: mdi:calendar-clock
+
+## WEATHER DATA ##
+
+- platform: weather_data
+  name: "Weather Current"
+  monitored_conditions:
+    - precipitation
+- platform: weather_data
+  name: "Weather +1"
+  forecast: 1
+  monitored_conditions:
+    - precipitation
+- platform: weather_data
+  name: "Weather +2"
+  forecast: 2
+  monitored_conditions:
+    - precipitation
+- platform: weather_data
+  name: "Weather +3"
+  forecast: 3
+  monitored_conditions:
+    - precipitation
+- platform: weather_data
+  name: "Weather +4"
+  forecast: 4
+  monitored_conditions:
+    - precipitation
+- platform: weather_data
+  name: "Weather +5"
+  forecast: 5
+  monitored_conditions:
+    - precipitation
+
+#########################################
+#  Group Light Daily Power Consumption  #
+#########################################
+- platform: template
+  sensors:
+    lights_consumption_historic:
+      unique_id: "928474625151439"
+      friendly_name: "Lights - Historic Consumption"
+      unit_of_measurement: kWh
+      value_template: >-
+        {% set end = 'light_energy' %}
+        {% set ns = namespace(states=[]) %}
+        {% for s in states.sensor %}
+          {% if s.object_id.endswith(end) %}
+            {% set ns.states = ns.states + [ s.state | float(0.0) ] %}
+          {% endif %}
+        {% endfor %}
+        {{ ns.states | sum | round(2, "floor", 0) }}
+      attribute_templates:
+        state_class: "total"
+        device_class: "energy"
+
+    lights_power:
+      friendly_name: "Lights - Power"
+      unit_of_measurement: W
+      value_template: >-
+        {% set end = 'light_power' %}
+        {% set ns = namespace(states=[]) %}
+        {% for s in states.sensor %}
+          {% if s.object_id.endswith(end) %}
+            {% set ns.states = ns.states + [ s.state | float(0.0) ] %}
+          {% endif %}
+        {% endfor %}
+        {{ ns.states | sum | round(2, "floor", 0) }}
+      attribute_templates:
+        state_class: "measurement"
+        device_class: "power"
+
+    night_mode_start_string:
+      friendly_name: Night Mode Start String
+      value_template: >-
+        {% set hours = states.input_number.night_mode_time_modifier_hours.state | int %}
+        {% set minutes = states.input_number.night_mode_time_modifier_minutes.state | int %}
+        {{ hours }}:{{ minutes }}:00
+
+## NORDPOOL ##
+- platform: nordpool
+  VAT: True
+  currency: "NOK"
+  region: "Bergen"
+  precision: 5
+  price_type: kWh
+  additional_costs: "{{0.01|float}}"
+  low_price_cutoff: 0.96
+
+- platform: template
+  sensors:
+    nordpool_low_price:
+      friendly_name: "Nordpool Low Price"
+      value_template: "{{ state_attr('sensor.nordpool_kwh_bergen_nok_5_096_025', 'low price') }}"
+
+    ams_integrated_power_consumption_hourly_kwh:
+      friendly_name: AMS Integrated Power Consumption Hourly kWh
+      value_template: "{{ (states('sensor.ams_integrated_power_consumption_hourly') | int / 1000) | round(2)}}"
+      unit_of_measurement: kWh
+    hourly_consumption_estimate_over_time:
+      value_template: "{{ ((states('sensor.ams_integrated_power_consumption_hourly_kwh') | float / (now().minute)) * 60) | round(3) }}"
+      unit_of_measurement: kWh/h
+    hourly_consumption_control_alarm:
+      value_template: "{{ (now().minute >= 40) and (states('sensor.ams_integrated_power_consumption_hourly_kwh') | float > 3.9) }}"
+      friendly_name: Hourly Consumption Control - Alarm

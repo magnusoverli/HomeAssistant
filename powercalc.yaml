@@ -1,0 +1,5 @@
+scan_interval: 00:00:10
+power_sensor_naming: "{}_light_power"
+energy_sensor_naming: "{}_light_energy"
+create_energy_sensors: true
+enable_autodiscovery: true

@@ -1,0 +1,9 @@
+- trigger:
+    platform: event
+    event_type: mobile_app_notification_action
+    event_data:
+      action: close
+  binary_sensor:
+    - name: "App notification triggered last minute"
+      auto_off: 65
+      state: "true"
