@@ -1,8 +1,8 @@
 substitutions:
-  node_name: entrance-nspanel
-  friendly_devicename: Entrance Wall Panel - Sonoff NSPanel
-  panel_recv_topic: "tele/nspanel_1/RESULT"
-  panel_send_topic: "cmnd/nspanel_1/CustomSend"
+  node_name: livingroom-nspanel
+  friendly_devicename: Livingroom Wall Panel - Sonoff NSPanel
+  panel_recv_topic: "tele/nspane2_1/RESULT"
+  panel_send_topic: "cmnd/nspane2_1/CustomSend"
 
 external_components:
   - source:
@@ -32,7 +32,6 @@ uart:
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
-  use_address: 192.168.5.250
 
 mqtt:
   id: mqtt_client
@@ -206,13 +205,13 @@ rtttl:
   id: buzzer
   output: buzzer_out
 
-switch:
-  # Turn screen power on/off. Easy way to configure the screen power control, but this should not be used from HA, as all components must be re-initialized afterwards. For lights, names of lights etc. this practically means that the state must change once to happen.
-  - platform: gpio
-    name: Screen Power
-    id: screen_power
-    entity_category: config
-    pin:
-      number: 4
-      inverted: true
-    restore_mode: ALWAYS_ON
+#switch:
+#  # Turn screen power on/off. Easy way to configure the screen power control, but this should not be used from HA, as all components must be re-initialized afterwards. For lights, names of lights etc. this practically means that the state must change once to happen.
+#  - platform: gpio
+#    name: Screen Power
+#    id: screen_power
+#    entity_category: config
+#    pin:
+#      number: 4
+#      inverted: true
+#    restore_mode: ALWAYS_ON

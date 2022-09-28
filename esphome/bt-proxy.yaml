@@ -1,18 +1,20 @@
 substitutions:
-  devicename: sniffer
-  upper_devicename: Sniffer
+  devicename: bt_proxy
+  upper_devicename: BT Proxy
   hardware: TTGO T-display (ESP32)
 
 esphome:
   name: "$devicename"
   comment: "$upper_devicename - $hardware"
 
-  includes:
-    - acurite.h
 esp32:
+  board: esp32dev
   framework:
     type: arduino
-  board: esp-wrover-kit
+
+bluetooth_proxy:
+esp32_ble_tracker:
+
 wifi:
   reboot_timeout: 10min
   networks:
@@ -25,25 +27,9 @@ ota:
 logger:
 
 api:
+  password: !secret api_password
   reboot_timeout: 0s
 
 time:
   - platform: homeassistant
     id: esptime
-
-remote_receiver:
-  id: receiver
-  pin: 
-    number: 33
-    inverted: true
-  idle: 6ms
-  filter: 200us
-  tolerance: 35%
-
-custom_component:
-  lambda: |-
-    return {new Acurite()};
-
-sensor:
-binary_sensor:
-text_sensor:

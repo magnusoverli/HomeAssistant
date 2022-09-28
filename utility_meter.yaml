@@ -18,7 +18,7 @@ attic_freezer_daily_energy_utility:
 
 hvac_energy_daily:
   name: Hvac
-  source: sensor.livingroom_hvac_energy
+  source: sensor.hvac_sensor_smartenergysummation
   cycle: daily
 
 attic_fan_heater_energy_daily:

@@ -7,9 +7,9 @@ homeassistant:
   customize: !include customize.yaml
   auth_mfa_modules:
     - type: totp
-#home_connect: !include home_connect.yaml
 home_connect_alt: !include home_connect_alt.yaml
 http: !include http.yaml
+influxdb: !include influxdb.yaml
 ios: !include ios.yaml
 light: !include light.yaml
 logger: !include logger.yaml
@@ -27,3 +27,7 @@ sensor: !include sensor.yaml
 template: !include template.yaml
 tts: !include tts.yaml
 utility_meter: !include utility_meter.yaml
+zha:
+  zigpy_config:
+    network:
+      channel: 11

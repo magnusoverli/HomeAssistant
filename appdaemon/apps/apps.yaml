@@ -1,0 +1,133 @@
+nspanel_1:
+  module: nspanel-lovelace-ui
+  class: NsPanelLovelaceUIManager
+  config:
+    panelRecvTopic: "tele/nspanel_1/RESULT"
+    panelSendTopic: "cmnd/nspanel_1/CustomSend"
+    locale: "NO"
+    model: "eu"
+    screenBrightness: 100
+    defaultBackgroundColor: black
+    sleepTimeout: 15
+    sleepBrightness:
+      - time: "6:00:00"
+        value: 90
+      - time: "21:00:00"
+        value: 30
+    screensaver:
+      entity: weather.furulien
+      alternativeLayout: false
+      defaultCard: cardGrid_grid1
+      theme:
+        time: [255, 255, 225]
+        date: [255, 255, 225]
+        background: [0, 0, 25]
+        tF4Icon: [255, 255, 225]
+        tForecast4Val: [255, 255, 255]
+        autoWeather: true
+        sunny: [255, 230, 0]
+      weatherOverrideForecast4:
+        entity: sensor.garage_door_norwegian
+        name: Garasje
+        icon: mdi:garage-variant
+    cards:
+      - type: cardGrid
+        title: ""
+        key: grid1
+        entities:
+          - entity: input_button.nspanel_good_night_button
+            name: God natt
+            icon: mdi:bed-outline
+            color: [255, 255, 255]
+          - entity: input_button.nspanel_indoor_lights_on
+            name: "Lys på"
+            icon: mdi:lightbulb-on-outline
+            color: [255, 255, 255]
+          - entity: input_button.nspanel_all_off
+            name: Alt av
+            icon: mdi:home-clock-outline
+            color: [255, 255, 255]
+          - entity: input_button.nspanel_button_outdoor_lights
+            name: Utelys
+            icon: mdi:lightbulb-on-outline
+            color: [255, 255, 255]
+      - type: cardMedia
+        title: Sonos - Kjøkken
+        entity: media_player.sonos
+      - type: cardThermo
+        title: Varmepumpe
+        entity: climate.livingroom_hvac
+      - type: cardQR
+        title: Guest Wifi
+        qrCode: "WIFI:S:House of Dragons;T:WPA;P:drakarys;;"
+nspanel_2:
+  module: nspanel-lovelace-ui
+  class: NsPanelLovelaceUIManager
+  config:
+    panelRecvTopic: "tele/nspane2_1/RESULT"
+    panelSendTopic: "cmnd/nspane2_1/CustomSend"
+    locale: "NO"
+    model: "eu"
+    screenBrightness: 60
+    defaultBackgroundColor: black
+    sleepTimeout: 5
+    sleepBrightness:
+      - time: "6:00:00"
+        value: 60
+      - time: "22:30:00"
+        value: 10
+    screensaver:
+      entity: weather.furulien
+      alternativeLayout: false
+      defaultCard: cardGrid_grid1
+      theme:
+        time: [155, 135, 125]
+        date: [255, 255, 225]
+        background: [0, 0, 0]
+        tF4Icon: [255, 255, 225]
+        tForecast4Val: [255, 255, 255]
+        autoWeather: true
+        sunny: [255, 230, 0]
+      weatherOverrideForecast4:
+        entity: sensor.garage_door_norwegian
+        name: Garasje
+        icon: mdi:garage-variant
+    cards:
+      - type: cardGrid
+        title: ""
+        key: grid1
+        entities:
+          - entity: light.silicon_labs_ezsp_livingroom_zha_group_0x0006
+            name: Stuelys
+            #icon: mdi:lightbulb-on-outline
+            color: [255, 255, 255]
+          - entity: input_button.nspanel_button_movie_mode
+            name: Film!
+            icon: mdi:movie-open-star-outline
+            color: [255, 255, 255]
+          - entity: input_button.nspanel_button_moviemode_off
+            name: Film ferdig
+            icon: mdi:movie-off-outline
+            color: [255, 255, 255]
+          - entity: input_button.nspanel_good_night_button
+            name: God natt
+            icon: mdi:bed-outline
+            color: [255, 255, 255]
+          - entity: input_button.nspanel_all_off
+            name: Alt av
+            icon: mdi:home-clock-outline
+            color: [255, 255, 255]
+      - type: cardThermo
+        title: Varmepumpe
+        entity: climate.livingroom_hvac
+      - type: cardMedia
+        title: Sonos - Kjøkken
+        entity: media_player.sonos
+      - type: cardPower
+        title: PowerTest
+        entities:
+          - entity: sensor.booth_1_light_light_energy_powercalc
+          - entity: sensor.ams_integrated_power_consumption
+      - type: cardQR
+        title: Guest Wifi
+        qrCode: "WIFI:S:House of Dragons;T:WPA;P:drakarys;;"

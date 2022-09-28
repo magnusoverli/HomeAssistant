@@ -4,5 +4,5 @@ zwave:
   icon: "mdi:z-wave"
 zigbee:
   title: "Zigbee"
-  url: "https://zigbee.magnusoverli.duckdns.org/"
+  url: "https://hassio.magnusoverli.duckdns.org/config/zha/dashboard?config_entry=5a1cf78ae2436c12e9a1bd6bf006d34f"
   icon: mdi:zigbee

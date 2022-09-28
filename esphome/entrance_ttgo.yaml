@@ -7,8 +7,8 @@ esphome:
   name: "$devicename"
   comment: "$upper_devicename - $hardware"
   platform: ESP32
-  #board: esp32dev
   board: esp-wrover-kit
+
 
 wifi:
   reboot_timeout: 10min

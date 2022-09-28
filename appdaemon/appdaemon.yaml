@@ -1,0 +1,24 @@
+---
+secrets: /config/secrets.yaml
+appdaemon:
+  latitude: 60.442799
+  longitude: 5.288210
+  elevation: 18
+  time_zone: Europe/Oslo
+  plugins:
+    HASS:
+      type: hass
+    MQTT:
+      type: mqtt
+      namespace: mqtt
+      client_id: "appdaemon"
+      client_host: 192.168.5.37
+      client_port: 1883
+      client_user: "magnus"
+      client_password: "Eplekake64"
+      client_topics: NONE
+http:
+  url: http://127.0.0.1:5050
+admin:
+api:
+hadashboard:
